@@ -1,14 +1,14 @@
 """Client for accessing the TD Ameritrade API"""
 
-from datetime import date, datetime
+from datetime import datetime
 from typing import Dict, List, Union
-
+from pathlib import Path
 import requests
 from loguru import logger
 
 from tdapi.config import UserConfig, user_config
 from tdapi.models.auth import EASObject
-from tdapi.utils import (PACKAGE_DIR, date_to_millis, load_json,
+from tdapi.utils import (date_to_millis, load_json,
                          parse_frequency_str, remove_null_values, save_json)
 
 # Globals
@@ -19,10 +19,10 @@ TD_CLIENT = None
 
 # Helper Functions
 # ========================================================
-def get_client():
+def get_client(auth_filepath: Path=None):
     global TD_CLIENT
     if TD_CLIENT is None:
-        TD_CLIENT = TDClient()
+        TD_CLIENT = TDClient(auth_filepath)
     return TD_CLIENT
 
 
@@ -45,14 +45,15 @@ class BadStatusCode(Exception):
 # ========================================================
 class TDClient(requests.Session):
     base_url = "https://api.tdameritrade.com"
-    eas_json_filepath = PACKAGE_DIR / "eas.json"
     eas_object: EASObject = EASObject()
+    auth_filepath: Path
 
-    def __init__(self):
+    def __init__(self, auth_filepath: Path):
         super().__init__()
 
+        self.auth_filepath = auth_filepath
         self.user_config: UserConfig = user_config
-        eas_dict = load_json(self.eas_json_filepath)
+        eas_dict = load_json(self.auth_filepath)
         self.update_eas_object(eas_dict)
 
     def _get(self, url, **kwargs):
@@ -103,18 +104,18 @@ class TDClient(requests.Session):
         _eas_dict.update(eas_dict)
         self.eas_object = EASObject(**_eas_dict)
         self.headers.update({"Authorization": f"Bearer {self.eas_object.access_token}"})
-        save_json(self.eas_object, self.eas_json_filepath, indent=2)
+        save_json(self.eas_object, self.auth_filepath, indent=2)
 
     def authenticate(self):
         logger.debug("Authenticating session...")
 
         if self.eas_object is None:
             try:
-                eas_dict = load_json(self.eas_json_filepath)
+                eas_dict = load_json(self.auth_filepath)
                 eas_object = EASObject(**eas_dict)
 
             except FileNotFoundError as e:
-                logger.critical(f"{self.eas_json_filepath} not found.")
+                logger.critical(f"{self.auth_filepath} not found.")
                 raise e
 
         else:
