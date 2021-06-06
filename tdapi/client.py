@@ -173,6 +173,15 @@ class TDClient(requests.Session):
     """Instruments"""
 
     """Market Hours"""
+    def _get_market_hours(self, markets: List[str], date: str=None):
+        route = self.base_url + "/v1/marketdata/hours"
+
+        params = {"markets": ",".join(markets), "date": date}
+
+        resp = self._get(route, params=params)
+        self.validate_status(resp, 200)
+
+        return resp.json()
 
     """Movers"""
 
@@ -270,3 +279,17 @@ class TDClient(requests.Session):
         )
 
         return data["candles"]
+
+    def get_market_hours(self, market:str, date: str=None):
+        markets = self._get_market_hours([market], date)
+        markets_hours = markets[market.lower()]
+        first_market = list(markets_hours.keys())[0]
+        hours = markets_hours[first_market]
+
+        if hours["isOpen"] is False:
+            return False, None, None
+
+        else:
+            start = hours["sessionHours"]["regularMarket"][0]["start"]
+            end = hours["sessionHours"]["regularMarket"][0]["end"]
+            return True, start, end
