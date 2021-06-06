@@ -1,7 +1,7 @@
 """Client for accessing the TD Ameritrade API"""
 
 from datetime import date, datetime
-from typing import List, Union, Dict
+from typing import Dict, List, Union
 
 import requests
 from loguru import logger
@@ -10,7 +10,6 @@ from tdapi.config import UserConfig, user_config
 from tdapi.models.auth import EASObject
 from tdapi.utils import (PACKAGE_DIR, date_to_millis, load_json,
                          parse_frequency_str, remove_null_values, save_json)
-
 
 # Constants
 # ========================================================
@@ -248,7 +247,9 @@ class TDClient(requests.Session):
         end_date_millis = date_to_millis(end_date)
 
         if freq_type not in VALID_FREQUENCY_TYPES:
-            raise ValueError(f"Frequency type: {freq_type} not valid. Must be one of: {', '.join(VALID_FREQUENCY_TYPES)}")
+            raise ValueError(
+                f"Frequency type: {freq_type} not valid. Must be one of: {', '.join(VALID_FREQUENCY_TYPES)}"
+            )
 
         if freq_type == "minute":
             period_type = "day"
