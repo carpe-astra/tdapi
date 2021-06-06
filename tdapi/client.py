@@ -11,9 +11,19 @@ from tdapi.models.auth import EASObject
 from tdapi.utils import (PACKAGE_DIR, date_to_millis, load_json,
                          parse_frequency_str, remove_null_values, save_json)
 
-# Constants
+# Globals
 # ========================================================
 VALID_FREQUENCY_TYPES = ("minute", "daily", "weekly", "monthly")
+TD_CLIENT = None
+
+
+# Helper Functions
+# ========================================================
+def get_client():
+    global TD_CLIENT
+    if TD_CLIENT is None:
+        TD_CLIENT = TDClient()
+    return TD_CLIENT
 
 
 # Helper Classes
@@ -173,7 +183,8 @@ class TDClient(requests.Session):
     """Instruments"""
 
     """Market Hours"""
-    def _get_market_hours(self, markets: List[str], date: str=None):
+
+    def _get_market_hours(self, markets: List[str], date: str = None):
         route = self.base_url + "/v1/marketdata/hours"
 
         params = {"markets": ",".join(markets), "date": date}
@@ -280,7 +291,7 @@ class TDClient(requests.Session):
 
         return data["candles"]
 
-    def get_market_hours(self, market:str, date: str=None):
+    def get_market_hours(self, market: str, date: str = None):
         markets = self._get_market_hours([market], date)
         markets_hours = markets[market.lower()]
         first_market = list(markets_hours.keys())[0]
