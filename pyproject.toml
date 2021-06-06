@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "tdapi"
+version = "0.1.0"
+description = ""
+authors = ["Taylor Young <y.taylor@rocketmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+requests = "^2.25.1"
+loguru = "^0.5.3"
+pydantic = {extras = ["dotenv"], version = "^1.8.2"}
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+black = "^21.5b2"
+coverage = "^5.5"
+isort = "^5.8.0"
+pylint = "^2.8.3"
+mypy = "^0.812"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
