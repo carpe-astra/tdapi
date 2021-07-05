@@ -1,15 +1,18 @@
 """Client for accessing the TD Ameritrade API"""
 
 from datetime import datetime
-from typing import Dict, List, Union
 from pathlib import Path
+from typing import Dict, List, Union
+
 import requests
 from loguru import logger
 
+import tdapi.constants as constants
+import tdapi.models as models
 from tdapi.config import UserConfig, user_config
 from tdapi.models.auth import EASObject
-from tdapi.utils import (date_to_millis, load_json,
-                         parse_frequency_str, remove_null_values, save_json)
+from tdapi.utils import (date_to_millis, load_json, parse_frequency_str,
+                         remove_null_values, save_json)
 
 # Globals
 # ========================================================
@@ -19,7 +22,7 @@ TD_CLIENT = None
 
 # Helper Functions
 # ========================================================
-def get_client(auth_filepath: Path=None):
+def get_client(auth_filepath: Path = None):
     global TD_CLIENT
     if TD_CLIENT is None:
         TD_CLIENT = TDClient(auth_filepath)
@@ -198,6 +201,60 @@ class TDClient(requests.Session):
     """Movers"""
 
     """Option Chains"""
+
+    def _get_option_chain(
+        self,
+        symbol: str,
+        contract_type: str = constants.options.ContractType.ALL,
+        strike_count: int = None,
+        include_quotes: bool = constants.options.IncludeQuotes.FALSE,
+        strategy: str = constants.options.Strategy.SINGLE,
+        interval: str = None,
+        strike: float = None,
+        strike_range: str = constants.options.Range.ALL,
+        from_date: str = None,
+        to_date: str = None,
+        volatility: float = None,
+        underlying_price: float = None,
+        interest_rate: float = None,
+        days_to_expiration: int = None,
+        exp_month: str = None,
+        option_type: str = constants.options.Type.ALL,
+    ) -> List[models.options.Option]:
+        route = self.base_url + "/v1/marketdata/chains"
+
+        params = {
+            "symbol": symbol,
+            "contractType": contract_type,
+            "strikeCount": strike_count,
+            "includeQuotes": include_quotes,
+            "strategy": strategy,
+            "interval": interval,
+            "strike": strike,
+            "range": strike_range,
+            "fromDate": from_date,
+            "toDate": to_date,
+            "volatility": volatility,
+            "underlyingPrice": underlying_price,
+            "interestRate": interest_rate,
+            "daysToExpiration": days_to_expiration,
+            "expMonth": exp_month,
+            "optionType": option_type,
+        }
+
+        params = remove_null_values(params)
+
+        resp = self._get(route, params=params)
+        self.validate_status(resp, 200)
+        data = resp.json()
+
+        options_list = []
+        for option_type_map in ("putExpDateMap", "callExpDateMap"):
+            for key, strike_option_dict in data[option_type_map].items():
+                for strike, option_list in strike_option_dict.items():
+                    options_list.append(models.options.Option(**option_list[0]))
+
+        return options_list
 
     """Price History"""
 
