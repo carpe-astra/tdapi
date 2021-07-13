@@ -63,3 +63,12 @@ def date_to_millis(date: Union[datetime, str]):
 
 def short_date_to_datetime(short_date_str: str):
     return datetime.strptime(short_date_str, SHORT_DATE_FORMAT)
+
+
+def millis_to_datetime(millis: int) -> datetime:
+    return datetime.fromtimestamp(millis / 1000)
+    
+
+def millis_to_short_date(millis: int) -> str:
+    dt = millis_to_datetime(millis)
+    return datetime.strftime(dt, SHORT_DATE_FORMAT)
