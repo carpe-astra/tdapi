@@ -4,8 +4,14 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
-from tdapi.constants.options import (ExchangeName, IncludeQuotes, PutCall,
-                                     Range, Strategy, Type)
+from tdapi.constants.options import (
+    ExchangeName,
+    IncludeQuotes,
+    PutCall,
+    Range,
+    Strategy,
+    Type,
+)
 
 
 class ExpirationDate(BaseModel):

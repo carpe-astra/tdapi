@@ -11,8 +11,14 @@ import tdapi.constants as constants
 import tdapi.models as models
 from tdapi.config import UserConfig, user_config
 from tdapi.models.auth import EASObject
-from tdapi.utils import (date_to_millis, load_json, parse_frequency_str,
-                         remove_null_values, save_json)
+from tdapi.utils import (
+    MODULE_DIR,
+    date_to_millis,
+    load_json,
+    parse_frequency_str,
+    remove_null_values,
+    save_json,
+)
 
 # Globals
 # ========================================================
@@ -24,8 +30,13 @@ TD_CLIENT = None
 # ========================================================
 def get_client(auth_filepath: Path = None):
     global TD_CLIENT
+
+    if auth_filepath is None:
+        auth_filepath = MODULE_DIR / "auth.json"
+
     if TD_CLIENT is None:
         TD_CLIENT = TDClient(auth_filepath)
+
     return TD_CLIENT
 
 
@@ -185,6 +196,18 @@ class TDClient(requests.Session):
         return resp.json()
 
     """Instruments"""
+
+    def _get_instrument(self, cusip: str, apikey: str = None):
+        route = self.base_url + f"/v1/instruments/{cusip}"
+
+        params = {"apikey": apikey}
+        params = remove_null_values(params)
+
+        resp = self._get(route, params=params)
+        self.validate_status(resp, 200)
+        data = resp.json()
+
+        return data
 
     """Market Hours"""
 

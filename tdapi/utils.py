@@ -10,7 +10,8 @@ from pydantic import BaseModel
 
 # Constants
 # ========================================================
-PACKAGE_DIR = Path(__file__).parent.parent
+MODULE_DIR = Path(__file__).parent
+PACKAGE_DIR = MODULE_DIR.parent
 SHORT_DATE_FORMAT = "%Y-%m-%d"
 FREQUENCY_PATTERN = re.compile(r"(?P<frequency>\d*)(?P<frequency_unit>.*)")
 
@@ -67,7 +68,7 @@ def short_date_to_datetime(short_date_str: str):
 
 def millis_to_datetime(millis: int) -> datetime:
     return datetime.fromtimestamp(millis / 1000)
-    
+
 
 def millis_to_short_date(millis: int) -> str:
     dt = millis_to_datetime(millis)
