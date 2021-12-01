@@ -22,7 +22,7 @@ class OptionDeliverables(BaseModel):
     symbol: str
     assetType: str
     deliverableUnits: str
-    currencyType: str
+    currencyType: Optional[str]
 
 
 class StrikePriceMap(dict):
