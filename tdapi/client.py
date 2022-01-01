@@ -209,6 +209,17 @@ class TDClient(requests.Session):
 
         return data
 
+    def _search_instruments(self, symbol: str, projection: str, apikey: str=None):
+        route = self.base_url + "/v1/instruments"
+
+        params = {"symbol": symbol, "projection": projection}
+
+        resp = self._get(route, params=params)
+        self.validate_status(resp, 200)
+        data = resp.json()
+
+        return data
+
     """Market Hours"""
 
     def _get_market_hours(self, markets: List[str], date: str = None):
